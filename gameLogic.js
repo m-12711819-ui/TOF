@@ -308,7 +308,7 @@ module.exports = {
 
         socket.on('startGame', () => {
             let room = getRoom(socket);
-            if(room && room.host === socket.id) {
+            if(room && room.host === socket.id && room.players.length >= 2) {
                 room.status = 'playing';
                 logMsg(room, `The Stewardship begins...`);
                 broadcast(io, room.code);
