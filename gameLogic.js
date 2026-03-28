@@ -97,7 +97,8 @@ function triggerGameOver(room) {
 }
 
 function rollDice(io, room, player) {
-    if (room.interaction || room.isGameOver || player.id !== room.turnIndex) return;
+    let activePlayer = room.players[room.turnIndex];
+    if (room.interaction || room.isGameOver || !activePlayer || player.id !== activePlayer.id) return;
 
     let d1 = Math.floor(Math.random() * 6) + 1;
     let d2 = Math.floor(Math.random() * 6) + 1;
