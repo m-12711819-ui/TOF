@@ -32,7 +32,12 @@ const dom = {
     btnAddBot: document.getElementById('btn-add-bot'),
     btnStart: document.getElementById('btn-start-game'),
     dispRoomCode: document.getElementById('display-room-code'),
-    lobbyPlayersList: document.getElementById('lobby-players-list')
+    lobbyPlayersList: document.getElementById('lobby-players-list'),
+    
+    // Rules Modal
+    btnShowRules: document.getElementById('btn-show-rules'),
+    btnCloseRules: document.getElementById('btn-close-rules'),
+    rulesModal: document.getElementById('rules-modal')
 };
 
 // Initialize static board
@@ -97,6 +102,14 @@ createBoardUI();
 
 // Socket event bindings
 socket.on('connect', () => { mySocketId = socket.id; });
+
+// Rules Modal Listeners
+dom.btnShowRules.addEventListener('click', () => {
+    dom.rulesModal.classList.remove('hidden');
+});
+dom.btnCloseRules.addEventListener('click', () => {
+    dom.rulesModal.classList.add('hidden');
+});
 
 dom.btnJoin.addEventListener('click', () => {
     let name = document.getElementById('player-name').value;
