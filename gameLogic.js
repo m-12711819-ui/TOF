@@ -40,7 +40,6 @@ function broadcast(io, roomCode) {
     const room = rooms[roomCode];
     if (!room) return;
     const safeState = JSON.parse(JSON.stringify(room));
-    safeState.players.forEach(p => delete p.socketId);
     io.to(roomCode).emit('gameStateUpdate', safeState);
     handleBotTurn(io, room);
 }
