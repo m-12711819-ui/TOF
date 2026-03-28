@@ -221,8 +221,8 @@ socket.on('gameStateUpdate', (newState) => {
         dom.dispRoomCode.innerText = state.code;
         dom.lobbyPlayersList.innerHTML = state.players.map(p => `<li>${p.name} <span style="display:inline-block;width:10px;height:10px;background:${p.color};border-radius:50%"></span> ${p.socketId === mySocketId ? '(You)' : ''}</li>`).join('');
         
-        // Show start button only if host and >1 player total (or bots)
-        if (state.host === mySocketId && state.players.length > 0) {
+        // Show start button only if host and >=2 players total (or bots)
+        if (state.host === mySocketId && state.players.length >= 2) {
             dom.btnStart.style.display = 'block';
         } else {
             dom.btnStart.style.display = 'none';
