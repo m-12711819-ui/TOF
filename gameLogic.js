@@ -36,10 +36,11 @@ function getRoom(socket) {
 }
 
 function broadcast(io, roomCode) {
-    // Strip socket IDs before broadcasting
+    // Strip sensitive fields if any exist
     const room = rooms[roomCode];
     if (!room) return;
     const safeState = JSON.parse(JSON.stringify(room));
+    // Kept socketId intact so clients know which player they are
     io.to(roomCode).emit('gameStateUpdate', safeState);
     handleBotTurn(io, room);
 }
@@ -251,6 +252,13 @@ module.exports = {
             socket.join(roomCode);
             let room = initRoom(roomCode);
             
+            // Cap at 4 players
+            if (room.players.length >= 4) {
+                // If it's a full room, silently ignore for now or they could spectate.
+                // For MVP, just prevent joining.
+                return;
+            }
+
             let p = {
                 id: playerCounter++,
                 socketId: socket.id,
@@ -278,6 +286,8 @@ module.exports = {
         socket.on('addBot', () => {
             let room = getRoom(socket);
             if(room && room.host === socket.id && room.status === 'lobby') {
+                if(room.players.length >= 4) return; // Cap at 4 players
+
                 let p = {
                     id: playerCounter++,
                     socketId: null,
