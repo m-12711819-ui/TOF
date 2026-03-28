@@ -155,7 +155,21 @@ function resolveSpace(io, room, player, index) {
     if (space.type === 'tides') {
         if (room.tofDeck.length > 0) {
             let card = room.tofDeck.pop();
-            logMsg(room, `${player.name} drew: ${card.name}`);
+            logMsg(room, `<strong style="color:${player.color}">${player.name}</strong> drew a Tide of Fate: <strong style="color:var(--gold)">${card.name}</strong>!`, player.color);
+            
+            if(card.id === "tof_1") {
+                let bonus = room.barakahBowl * 10;
+                room.players.forEach(p => p.dirhams += (50 + bonus));
+                logMsg(room, `Bountiful Harvest: Everyone received <strong style="color:var(--gold)">D${50 + bonus}</strong>!`, "var(--gold)");
+            } else if (card.id === "tof_4") {
+                let amount = room.players.length;
+                room.barakahBowl += amount;
+                logMsg(room, `Unexpected Rain: Shared Joy! Added ${amount} Seeds to the Barakah Bowl.`, "var(--emerald)");
+                if (room.barakahBowl >= MAX_SEEDS) triggerGameOver(room);
+            } else {
+                logMsg(room, `[Fate Enacted] The effects of ${card.name} shift the era...`, "var(--text-muted)");
+            }
+
             setInteraction(room, card.name, card.desc, [{ label: "Acknowledge", actionId: "endTurn", primary: true }]);
         } else {
             endTurn(io, room);
