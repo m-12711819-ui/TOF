@@ -8,6 +8,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <button id="btn-show-rules" class="secondary-btn" style="position: fixed; top: 10px; right: 10px; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">How To Play</button>
+
+  <div id="rules-modal" class="glass-panel hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-height: 80vh; z-index: 2000; overflow-y: auto; text-align: left; padding: 30px; border: 2px solid var(--gold);">
+    <h2 style="color:var(--gold); border-bottom: 1px solid var(--gold); padding-bottom:10px;">Tides of Fate: The Guide</h2>
+    
+    <div style="margin-top: 20px; line-height: 1.6;">
+        <h3 style="color:var(--emerald);">Objective</h3>
+        <p>Your goal is to build the greatest **Legacy Score** by acquiring wealth, developing properties, fulfilling secret Niyyah (Intentions), and earning Gratitude Tokens by helping others. The game ends the moment the **Barakah Bowl hits 20 Golden Seeds**!</p>
+        
+        <h3 style="color:var(--emerald); margin-top:20px;">Key Mechanics</h3>
+        <ul style="margin-left:20px; margin-bottom: 20px;">
+            <li><strong style="color:var(--gold)">The Barakah Bowl:</strong> Seeds are added when players roll 3 doubles, waive rent for another player, or trigger specific Tides of Fate events. At 20 Seeds, the Era of Prosperity arrives and the game instantly ends!</li>
+            <li><strong style="color:var(--gold)">The Common Well (Charity):</strong> Landing on Zakat/Sadaqah forces you to pay into the Well. If you land on The Oasis and the Well has 100+ Dirhams, the poorest player receives 100 Dirhams!</li>
+            <li><strong style="color:var(--gold)">Waiving Rent:</strong> If you owe rent on an opponent's property, they can choose to **Waive** the fee. This grants them a Gratitude Token (worth massive points at the end) and adds a Golden Seed to the bowl!</li>
+            <li><strong style="color:var(--gold)">Reflection Garden:</strong> If you roll 3 doubles or land on 'Go To Reflection', you are sent here. You must wait 3 turns OR roll doubles to leave early.</li>
+            <li><strong style="color:var(--gold)">Secret Niyyah Cards:</strong> Every player starts with 3 hidden objective cards. Fulfill their confusing or peculiar tasks quietly throughout the game for massive bonus points when the game ends. Keep them secret!</li>
+            <li><strong style="color:var(--gold)">Tides of Fate:</strong> Landing on these spaces triggers server-wide global events. Some help everyone, some trigger recessions, and some dump seeds into the Barakah Bowl.</li>
+        </ul>
+    </div>
+    
+    <button id="btn-close-rules" class="primary-btn" style="margin-top:20px; width:100%;">Close</button>
+  </div>
+
   <!-- LOBBY SCREEN -->
   <div id="lobby-screen" class="glass-panel" style="width: 400px; text-align: center; padding: 30px;">
     <h1 style="color:var(--gold)">Tides of Fate</h1>
