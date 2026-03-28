@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tides of Fate</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- LOBBY SCREEN -->
+  <div id="lobby-screen" class="glass-panel" style="width: 400px; text-align: center; padding: 30px;">
+    <h1 style="color:var(--gold)">Tides of Fate</h1>
+    <div style="margin: 20px 0;">
+        <input type="text" id="player-name" placeholder="Enter Your Name" style="padding: 10px; width: 100%; border-radius: 4px; border: none; margin-bottom: 10px;">
+        
+        <select id="player-color" style="padding: 10px; width: 100%; border-radius: 4px; border: none; margin-bottom: 20px; color: black;">
+            <option value="#f44336">Red</option>
+            <option value="#2196f3">Blue</option>
+            <option value="#4caf50">Green</option>
+            <option value="#ff9800">Orange</option>
+        </select>
+        
+        <input type="text" id="room-code-input" placeholder="Room Code (Leave empty to create new)" style="padding: 10px; width: 100%; border-radius: 4px; border: none; margin-bottom: 20px; text-transform: uppercase;">
+
+        <button id="btn-join-room" class="primary-btn" style="width: 100%; margin-bottom: 10px;">Create / Join Lobby</button>
+    </div>
+  </div>
+
+  <!-- WAITING ROOM (Inside Lobby after joining) -->
+  <div id="waiting-room" class="glass-panel hidden" style="width: 400px; text-align: center; padding: 30px;">
+    <h2 style="color:var(--emerald)">Room: <span id="display-room-code"></span></h2>
+    <h3 style="margin-top:20px; text-align:center;">Players</h3>
+    <ul id="lobby-players-list" style="list-style: none; padding:0; margin-bottom:20px; text-align:center;">
+        <!-- Injected -->
+    </ul>
+    
+    <button id="btn-add-bot" class="secondary-btn" style="width:100%; margin-bottom: 10px;">Add Bot 🤖</button>
+    <button id="btn-start-game" class="primary-btn" style="width:100%; display:none;">Start Game</button>
+  </div>
+
+  <div id="game-screen" class="game-container hidden">
+    <!-- Left: The Board -->
+    <div class="board-wrapper">
+        <div id="board" class="board">
+            <!-- The 40 board spaces will be injected here via JS -->
+
+            <!-- Center of the Board: The Hub -->
+            <div class="center-hub">
+                <div class="branding">
+                    <h1>Tides of Fate</h1>
+                </div>
+
+                <div class="well-bowl-container">
+                    <div class="well glass-panel">
+                        <h3>The Common Well</h3>
+                        <div class="amount"><span id="common-well-amount">0</span> D</div>
+                    </div>
+
+                    <div class="bowl glass-panel">
+                        <h3>Barakah Bowl</h3>
+                        <div class="amount"><span id="seeds-count">0</span> / 20</div>
+                        <div class="subtitle">Golden Seeds</div>
+                    </div>
+                </div>
+
+                <div class="action-center glass-panel">
+                    <div class="dice-container">
+                        <div id="die1" class="die">🎲</div>
+                        <div id="die2" class="die">🎲</div>
+                    </div>
+                    <button id="btn-roll" class="primary-btn">Roll Dice</button>
+                    <button id="btn-end-turn" class="secondary-btn hidden">End Turn</button>
+                </div>
+                
+                <div id="card-display" class="card-display hidden glass-panel">
+                    <h3 id="card-title">Card Title</h3>
+                    <p id="card-desc">Card Description</p>
+                    <button id="btn-dismiss-card" class="primary-btn">Acknowledge</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Sidebar & Dashboards -->
+    <div class="sidebar">
+        <!-- Player stats map -->
+        <div id="players-dashboard" class="players-dashboard">
+            <!-- Injected by JS -->
+        </div>
+
+        <!-- Action Panel for Interactions (Buying, Co-Investing, Waiving) -->
+        <div id="interaction-panel" class="interaction-panel glass-panel hidden">
+            <h3 id="interaction-title">Action Title</h3>
+            <p id="interaction-desc" class="desc">Details goes here.</p>
+            <div id="interaction-buttons" class="button-row">
+                <!-- dynamic buttons -->
+            </div>
+        </div>
+
+        <!-- Game Log -->
+        <div class="log-panel glass-panel">
+            <h3>Chronicles</h3>
+            <ul id="game-log">
+            </ul>
+        </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="data.js"></script>
+  <script src="engine.js"></script>
+</body>
+</html>
