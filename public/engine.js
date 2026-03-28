@@ -144,10 +144,10 @@ function renderDashboard() {
         pCard.style.borderLeftColor = p.color;
         
         let niyyahHtml = '';
-        // Only show button if it's MY player (or if we allow viewers to see it, but physically they shouldn't see opponents' cards)
-        let isMe = p.socketId === mySocketId && !p.isBot;
+        // Only show button if it's MY player
+        let isMe = (p.socketId === socket.id) && !p.isBot;
         
-        if (p.showNiyyahUI && (isMe || p.isBot)) { // For testing, let viewers see bot cards if they click
+        if (p.showNiyyahUI && isMe) { // Strict SECRECY: Bots' and opponents' cards are hidden
             niyyahHtml = `
                 <div class="niyyah-list" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--emerald);">
                     <h4 style="margin-bottom: 8px; color: var(--emerald);">Niyyah Cards</h4>
@@ -157,7 +157,7 @@ function renderDashboard() {
         }
 
         let niyyahBtn = '';
-        if (isMe || p.isBot) {
+        if (isMe) {
             niyyahBtn = `<button class="secondary-btn" style="width: 100%; margin-top: 10px; padding: 6px; font-size: 0.8rem;" onclick="toggleNiyyah(${p.id})">
                 ${p.showNiyyahUI ? 'Hide Niyyah Cards' : 'View Niyyah Cards'}
             </button>`;
@@ -219,10 +219,10 @@ socket.on('gameStateUpdate', (newState) => {
 
     if (state.status === 'lobby') {
         dom.dispRoomCode.innerText = state.code;
-        dom.lobbyPlayersList.innerHTML = state.players.map(p => `<li>${p.name} <span style="display:inline-block;width:10px;height:10px;background:${p.color};border-radius:50%"></span> ${p.socketId === mySocketId ? '(You)' : ''}</li>`).join('');
+        dom.lobbyPlayersList.innerHTML = state.players.map(p => `<li>${p.name} <span style="display:inline-block;width:10px;height:10px;background:${p.color};border-radius:50%"></span> ${p.socketId === socket.id ? '(You)' : ''}</li>`).join('');
         
         // Show start button only if host and >=2 players total (or bots)
-        if (state.host === mySocketId && state.players.length >= 2) {
+        if (state.host === socket.id && state.players.length >= 2) {
             dom.btnStart.style.display = 'block';
         } else {
             dom.btnStart.style.display = 'none';
@@ -247,7 +247,7 @@ socket.on('gameStateUpdate', (newState) => {
         });
 
         let activePlayer = state.players[state.turnIndex];
-        let isMyTurn = activePlayer && (activePlayer.socketId === mySocketId);
+        let isMyTurn = activePlayer && (activePlayer.socketId === socket.id);
 
         if (state.interaction) {
             dom.btnRoll.classList.add('hidden');
