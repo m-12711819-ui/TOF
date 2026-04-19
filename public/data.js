@@ -9,7 +9,7 @@ const BOARD_SPACES = [
   { id: 7, name: "Tides of Fate", type: "tides" },
   { id: 8, name: "The Potter's Kiln", type: "district", color: "lightblue", price: 100, baseRent: 6 },
   { id: 9, name: "The Glassblower's Shop", type: "district", color: "lightblue", price: 120, baseRent: 8 },
-  { id: 10, name: "Reflection Garden", type: "reflection_visiting" }, // Just visiting
+  { id: 10, name: "Reflection Garden", type: "reflection_visiting" },
   { id: 11, name: "The Perfume Souq", type: "district", color: "pink", price: 140, baseRent: 10 },
   { id: 12, name: "The Water Mill", type: "utility", price: 150 },
   { id: 13, name: "The Silk Market", type: "district", color: "pink", price: 140, baseRent: 10 },
@@ -75,7 +75,6 @@ const NIYYAH_DECK = [
   { id: "niy_12", name: "The Community Pillar", desc: "Ensure the Barakah Bowl reaches 10 seeds before the middle of the Tides of Fate deck.", bonus: 50 }
 ];
 
-// District Colors mapped to hex codes for UI rendering
 const COLOR_MAP = {
   brown: "#8B4513",
   lightblue: "#87CEEB",
@@ -86,9 +85,9 @@ const COLOR_MAP = {
   green: "#008000",
   darkblue: "#00008B",
   station: "#333333",
-  utility: "#D2B48C" // Tan
+  utility: "#D2B48C"
 };
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { BOARD_SPACES, TIDES_OF_FATE_DECK, NIYYAH_DECK, COLOR_MAP };
+  module.exports = { BOARD_SPACES, TIDES_OF_FATE_DECK, NIYYAH_DECK, COLOR_MAP };
 }
