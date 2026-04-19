@@ -54,6 +54,31 @@ function getSpaceStyleClass(index) {
     return 'right';
 }
 
+function getSpaceBadgeLabel(space) {
+    switch (space.type) {
+        case 'district':
+            return '';
+        case 'station':
+            return 'Route';
+        case 'utility':
+            return 'Utility';
+        case 'tides':
+            return 'Fate';
+        case 'charity':
+            return 'Charity';
+        case 'oasis':
+            return 'Oasis';
+        case 'gate':
+            return 'Gate';
+        case 'reflection_visiting':
+            return 'Reflection';
+        case 'go_to_reflection':
+            return 'Go To';
+        default:
+            return '';
+    }
+}
+
 function createBoardUI() {
     BOARD_SPACES.forEach((space, i) => {
         const div = document.createElement('div');
@@ -75,9 +100,12 @@ function createBoardUI() {
         contentDiv.className = 'space-content';
 
         const badge = document.createElement('div');
-        badge.className = `space-type ${space.type}`;
-        badge.textContent = space.type.replace(/_/g, ' ');
-        contentDiv.appendChild(badge);
+        const badgeLabel = getSpaceBadgeLabel(space);
+        if (badgeLabel) {
+            badge.className = `space-type ${space.type}`;
+            badge.textContent = badgeLabel;
+            contentDiv.appendChild(badge);
+        }
 
         const nameDiv = document.createElement('div');
         nameDiv.className = 'name';
@@ -210,11 +238,11 @@ function renderDashboard() {
                 <span class="money-pill">D${player.dirhams}</span>
             </div>
             <div class="player-stats">
-                <div class="stat-item">Holdings <span>${holdings}</span></div>
-                <div class="stat-item">Gratitude <span>${player.gratitudeTokens}</span></div>
-                <div class="stat-item">Shelters <span>${builtShelters}</span></div>
-                <div class="stat-item">Endowments <span>${endowments}</span></div>
-                <div class="stat-item">Space <span>${player.position}</span></div>
+                <div class="stat-item"><span class="stat-label">Holdings</span><span class="stat-value">${holdings}</span></div>
+                <div class="stat-item"><span class="stat-label">Gratitude</span><span class="stat-value">${player.gratitudeTokens}</span></div>
+                <div class="stat-item"><span class="stat-label">Shelters</span><span class="stat-value">${builtShelters}</span></div>
+                <div class="stat-item"><span class="stat-label">Endowments</span><span class="stat-value">${endowments}</span></div>
+                <div class="stat-item"><span class="stat-label">Space</span><span class="stat-value">${player.position}</span></div>
             </div>
             ${isMe ? `<button class="secondary-btn slim-btn" onclick="toggleNiyyah(${player.id})">${player.showNiyyahUI ? 'Hide Niyyah' : 'View Niyyah'}</button>` : ''}
             ${niyyahHtml}
