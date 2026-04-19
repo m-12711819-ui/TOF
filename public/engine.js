@@ -1,9 +1,7 @@
-// public/engine.js
 const socket = io();
 
 let state = null;
-let mySocketId = null;
-let printedMessageIds = new Set(); // to prevent duplicate fade-out logs
+let printedMessageIds = new Set();
 
 const dom = {
     board: document.getElementById('board'),
@@ -23,8 +21,6 @@ const dom = {
     cardTitle: document.getElementById('card-title'),
     cardDesc: document.getElementById('card-desc'),
     btnDismissCard: document.getElementById('btn-dismiss-card'),
-    
-    // Lobby
     lobbyScreen: document.getElementById('lobby-screen'),
     waitingRoom: document.getElementById('waiting-room'),
     gameScreen: document.getElementById('game-screen'),
@@ -33,280 +29,348 @@ const dom = {
     btnStart: document.getElementById('btn-start-game'),
     dispRoomCode: document.getElementById('display-room-code'),
     lobbyPlayersList: document.getElementById('lobby-players-list'),
-    
-    // Rules Modal
     btnShowRules: document.getElementById('btn-show-rules'),
     btnCloseRules: document.getElementById('btn-close-rules'),
-    rulesModal: document.getElementById('rules-modal')
+    rulesModal: document.getElementById('rules-modal'),
+    turnIndicator: document.getElementById('turn-indicator'),
+    phaseIndicator: document.getElementById('phase-indicator'),
+    lastRollIndicator: document.getElementById('last-roll-indicator'),
+    scoreboardList: document.getElementById('scoreboard-list')
 };
 
-// Initialize static board
 function getGridPos(index) {
-    if(index >= 0 && index <= 10) return { r: 11, c: 11 - index };
-    if(index > 10 && index <= 20) return { r: 21 - index, c: 1 };
-    if(index > 20 && index <= 30) return { r: 1, c: index - 19 };
-    if(index > 30 && index <= 39) return { r: index - 29, c: 11 };
+    if (index >= 0 && index <= 10) return { r: 11, c: 11 - index };
+    if (index > 10 && index <= 20) return { r: 21 - index, c: 1 };
+    if (index > 20 && index <= 30) return { r: 1, c: index - 19 };
+    if (index > 30 && index <= 39) return { r: index - 29, c: 11 };
     return { r: 11, c: 11 };
 }
 
 function getSpaceStyleClass(index) {
-    if(index === 0 || index === 10 || index === 20 || index === 30) return 'corner';
-    if(index > 0 && index < 10) return 'bottom';
-    if(index > 10 && index < 20) return 'left';
-    if(index > 20 && index < 30) return 'top';
-    if(index > 30 && index < 40) return 'right';
+    if (index === 0 || index === 10 || index === 20 || index === 30) return 'corner';
+    if (index > 0 && index < 10) return 'bottom';
+    if (index > 10 && index < 20) return 'left';
+    if (index > 20 && index < 30) return 'top';
+    return 'right';
 }
 
 function createBoardUI() {
     BOARD_SPACES.forEach((space, i) => {
-        let div = document.createElement('div');
-        div.className = 'space ' + getSpaceStyleClass(i);
-        div.id = 'space-' + i;
+        const div = document.createElement('div');
+        div.className = `space ${getSpaceStyleClass(i)}`;
+        div.id = `space-${i}`;
+
         const pos = getGridPos(i);
         div.style.gridRow = pos.r;
         div.style.gridColumn = pos.c;
 
-        if(space.color && COLOR_MAP[space.color]) {
-            let cb = document.createElement('div');
+        if (space.color && COLOR_MAP[space.color]) {
+            const cb = document.createElement('div');
             cb.className = 'color-bar';
             cb.style.backgroundColor = COLOR_MAP[space.color];
             div.appendChild(cb);
         }
 
-        let contentDiv = document.createElement('div');
+        const contentDiv = document.createElement('div');
         contentDiv.className = 'space-content';
-        
-        let nameDiv = document.createElement('div');
+
+        const badge = document.createElement('div');
+        badge.className = `space-type ${space.type}`;
+        badge.textContent = space.type.replace(/_/g, ' ');
+        contentDiv.appendChild(badge);
+
+        const nameDiv = document.createElement('div');
         nameDiv.className = 'name';
-        nameDiv.innerHTML = space.name.replace(/^[Tt]he\s/i, '');
+        nameDiv.textContent = space.name.replace(/^[Tt]he\s/i, '');
         contentDiv.appendChild(nameDiv);
 
-        if(space.price) {
-            let pDiv = document.createElement('div');
+        if (space.price) {
+            const pDiv = document.createElement('div');
             pDiv.className = 'price';
-            pDiv.innerText = 'D' + space.price;
+            pDiv.innerText = `D${space.price}`;
             contentDiv.appendChild(pDiv);
         }
 
+        const ownerDiv = document.createElement('div');
+        ownerDiv.className = 'owner-badge hidden';
+        ownerDiv.id = `owner-badge-${i}`;
+        contentDiv.appendChild(ownerDiv);
+
         div.appendChild(contentDiv);
 
-        let tokensContainer = document.createElement('div');
+        const tokensContainer = document.createElement('div');
         tokensContainer.className = 'tokens-container';
-        tokensContainer.id = 'space-tokens-' + i;
+        tokensContainer.id = `space-tokens-${i}`;
         div.appendChild(tokensContainer);
 
         dom.board.appendChild(div);
     });
 }
+
 createBoardUI();
 
-// Socket event bindings
-socket.on('connect', () => { mySocketId = socket.id; });
+function getMe() {
+    if (!state) return null;
+    return state.players.find((player) => player.socketId === socket.id) || null;
+}
 
-// Rules Modal Listeners
-dom.btnShowRules.addEventListener('click', () => {
-    dom.rulesModal.classList.remove('hidden');
-});
-dom.btnCloseRules.addEventListener('click', () => {
-    dom.rulesModal.classList.add('hidden');
-});
+function updateDiceUI(lastRoll) {
+    dom.die1.textContent = lastRoll ? lastRoll.d1 : '?';
+    dom.die2.textContent = lastRoll ? lastRoll.d2 : '?';
+}
 
-dom.btnJoin.addEventListener('click', () => {
-    let name = document.getElementById('player-name').value;
-    let color = document.getElementById('player-color').value;
-    let code = document.getElementById('room-code-input').value;
-    socket.emit('joinRoom', { name, color, roomCode: code });
-    
-    dom.lobbyScreen.classList.add('hidden');
-    dom.waitingRoom.classList.remove('hidden');
-});
+function logMsgToDOM(msg, colorStr) {
+    const li = document.createElement('li');
+    li.innerHTML = msg;
+    if (colorStr) {
+        li.style.borderLeft = `3px solid ${colorStr}`;
+        li.style.paddingLeft = '8px';
+    }
+    li.classList.add('fade-out-log');
+    dom.log.prepend(li);
 
-dom.btnAddBot.addEventListener('click', () => {
-    socket.emit('addBot');
-});
-
-dom.btnStart.addEventListener('click', () => {
-    socket.emit('startGame');
-});
-
-dom.btnRoll.addEventListener('click', () => {
-    // Visual fake roll
-    dom.die1.classList.add('rolling'); dom.die2.classList.add('rolling');
     setTimeout(() => {
-        dom.die1.classList.remove('rolling'); dom.die2.classList.remove('rolling');
-        socket.emit('rollDice');
-    }, 500);
-});
+        li.style.transition = 'all 0.5s ease-out';
+        li.style.minHeight = '0px';
+        li.style.height = '0px';
+        li.style.margin = '0px';
+        li.style.paddingTop = '0px';
+        li.style.paddingBottom = '0px';
+        li.style.opacity = '0';
+        li.style.border = 'none';
+        setTimeout(() => {
+            if (li.parentNode) li.parentNode.removeChild(li);
+        }, 500);
+    }, 10000);
+}
 
-// Remove unused dismiss button local listener, rely on server interactions.
-
-// Niyyah toggle remains UI only
-window.toggleNiyyah = function(playerId) {
-    let p = state.players.find(x => x.id === playerId);
-    if (p) {
-        p.showNiyyahUI = !p.showNiyyahUI;
+window.toggleNiyyah = function toggleNiyyah(playerId) {
+    const player = state.players.find((entry) => entry.id === playerId);
+    if (player) {
+        player.showNiyyahUI = !player.showNiyyahUI;
         renderDashboard();
     }
+};
+
+function renderScoreboard() {
+    if (!state || !state.scoreboard) return;
+    dom.scoreboardList.innerHTML = state.scoreboard.map((entry, index) => `
+        <div class="score-row">
+            <div class="score-rank">#${index + 1}</div>
+            <div class="score-meta">
+                <strong>${entry.name}</strong>
+                <span>${entry.gratitudeTokens} gratitude</span>
+            </div>
+            <div class="score-value">${entry.score}</div>
+        </div>
+    `).join('');
 }
 
 function renderDashboard() {
     dom.playersDashboard.innerHTML = '';
-    state.players.forEach(p => {
-        let pCard = document.createElement('div');
-        pCard.className = 'player-card glass-panel ' + (p.id === state.turnIndex ? 'active-turn' : '');
-        pCard.style.borderLeftColor = p.color;
-        
-        let niyyahHtml = '';
-        // Only show button if it's MY player
-        let isMe = (p.socketId === socket.id) && !p.isBot;
-        
-        if (p.showNiyyahUI && isMe) { // Strict SECRECY: Bots' and opponents' cards are hidden
-            niyyahHtml = `
-                <div class="niyyah-list" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--emerald);">
-                    <h4 style="margin-bottom: 8px; color: var(--emerald);">Niyyah Cards</h4>
-                    ${p.niyyahCards.map(c => `<div style="margin-bottom:8px;"><strong>${c.name}</strong><br><span style="font-size:0.8rem;color:var(--text-muted)">${c.desc} (+<span style="color:var(--gold)">${c.bonus}D</span>)</span></div>`).join('')}
+
+    state.players.forEach((player) => {
+        const isTurn = state.players[state.turnIndex] && state.players[state.turnIndex].id === player.id;
+        const isMe = player.socketId === socket.id && !player.isBot;
+        const holdings = state.board.filter((entry) => entry.ownerId === player.id || entry.coOwnerId === player.id).length;
+        const builtShelters = state.board
+            .filter((entry) => entry.ownerId === player.id)
+            .reduce((sum, entry) => sum + entry.houses, 0);
+        const endowments = state.board.filter((entry) => entry.ownerId === player.id && entry.isEndowment).length;
+
+        const niyyahHtml = player.showNiyyahUI && isMe
+            ? `
+                <div class="niyyah-list">
+                    <h4>Niyyah Cards</h4>
+                    ${player.niyyahCards.map((card) => `
+                        <div class="niyyah-card">
+                            <strong>${card.name}</strong>
+                            <span>${card.desc}</span>
+                            <em>+${card.bonus} Legacy</em>
+                        </div>
+                    `).join('')}
                 </div>
-            `;
-        }
+            `
+            : '';
 
-        let niyyahBtn = '';
-        if (isMe) {
-            niyyahBtn = `<button class="secondary-btn" style="width: 100%; margin-top: 10px; padding: 6px; font-size: 0.8rem;" onclick="toggleNiyyah(${p.id})">
-                ${p.showNiyyahUI ? 'Hide Niyyah Cards' : 'View Niyyah Cards'}
-            </button>`;
-        }
+        const statusFlags = [];
+        if (player.inReflection) statusFlags.push('In Reflection');
+        if (player.skippedTurns > 0) statusFlags.push(`Skip ${player.skippedTurns}`);
+        if (isTurn) statusFlags.push('Active');
 
-        pCard.innerHTML = `
+        const card = document.createElement('div');
+        card.className = `player-card glass-panel ${isTurn ? 'active-turn' : ''}`;
+        card.style.borderLeftColor = player.color;
+        card.innerHTML = `
             <div class="player-header">
-                <strong>${p.name} ${isMe ? '(You)' : ''} ${p.isBot ? '🤖' : ''}</strong> 
-                <span style="color:var(--gold)">D${p.dirhams}</span>
+                <div>
+                    <strong>${player.name}${isMe ? ' (You)' : ''}${player.isBot ? ' [Bot]' : ''}</strong>
+                    <div class="player-flags">${statusFlags.join(' / ') || 'Ready'}</div>
+                </div>
+                <span class="money-pill">D${player.dirhams}</span>
             </div>
             <div class="player-stats">
-                <div class="stat-item">Districts: <span>${state.board.filter(b=>b.ownerId===p.id || b.coOwnerId===p.id).length}</span></div>
-                <div class="stat-item">Gratitude: <span>${p.gratitudeTokens}</span></div>
+                <div class="stat-item">Holdings <span>${holdings}</span></div>
+                <div class="stat-item">Gratitude <span>${player.gratitudeTokens}</span></div>
+                <div class="stat-item">Shelters <span>${builtShelters}</span></div>
+                <div class="stat-item">Endowments <span>${endowments}</span></div>
+                <div class="stat-item">Space <span>${player.position}</span></div>
             </div>
-            ${niyyahBtn}
+            ${isMe ? `<button class="secondary-btn slim-btn" onclick="toggleNiyyah(${player.id})">${player.showNiyyahUI ? 'Hide Niyyah' : 'View Niyyah'}</button>` : ''}
             ${niyyahHtml}
         `;
-        dom.playersDashboard.appendChild(pCard);
+        dom.playersDashboard.appendChild(card);
 
-        // Position their token on the board map
-        let existing = document.getElementById('token-' + p.id);
-        if(existing) existing.remove();
+        const existing = document.getElementById(`token-${player.id}`);
+        if (existing) existing.remove();
 
-        let spaceTokens = document.getElementById('space-tokens-' + p.position);
-        if(spaceTokens) {
-            let t = document.createElement('div');
-            t.className = 'token';
-            t.id = 'token-' + p.id;
-            t.style.backgroundColor = p.color;
-            spaceTokens.appendChild(t);
+        const container = document.getElementById(`space-tokens-${player.position}`);
+        if (container) {
+            const token = document.createElement('div');
+            token.className = 'token';
+            token.id = `token-${player.id}`;
+            token.style.backgroundColor = player.color;
+            token.title = player.name;
+            container.appendChild(token);
         }
+    });
+
+    state.board.forEach((entry, index) => {
+        const badge = document.getElementById(`owner-badge-${index}`);
+        if (!badge) return;
+
+        const owner = state.players.find((player) => player.id === entry.ownerId);
+        if (!owner) {
+            badge.classList.add('hidden');
+            badge.textContent = '';
+            return;
+        }
+
+        badge.classList.remove('hidden');
+        badge.style.background = owner.color;
+        badge.textContent = `${owner.name}${entry.isEndowment ? ' Waqf' : entry.houses > 0 ? ` +${entry.houses}` : ''}`;
     });
 }
 
-function logMsgToDOM(msg, colorStr) {
-    let li = document.createElement('li');
-    li.innerHTML = msg;
-    if (colorStr) { li.style.borderLeft = `3px solid ${colorStr}`; li.style.paddingLeft = '6px'; }
-    li.classList.add('fade-out-log');
-    dom.log.prepend(li);
-    
-    setTimeout(() => {
-        li.style.transition = 'all 0.5s ease-out';
-        li.style.minHeight = '0px'; li.style.height = '0px'; li.style.margin = '0px';
-        li.style.paddingTop = '0px'; li.style.paddingBottom = '0px'; li.style.opacity = '0'; li.style.border = 'none';
-        setTimeout(() => { if (li.parentNode) li.parentNode.removeChild(li); }, 500);
-    }, 10000);
+function renderTurnState() {
+    const activePlayer = state.players[state.turnIndex];
+    dom.turnIndicator.textContent = activePlayer ? activePlayer.name : 'Waiting';
+    dom.phaseIndicator.textContent = state.turnPhase || state.status;
+    dom.lastRollIndicator.textContent = state.lastRoll ? `${state.lastRoll.d1} + ${state.lastRoll.d2}` : '-';
+    updateDiceUI(state.lastRoll);
 }
 
+function renderInteraction() {
+    const activePlayer = state.players[state.turnIndex];
+    const me = getMe();
+    const canAct = state.interaction && me && state.interaction.targetPlayerId === me.id;
+
+    if (state.interaction) {
+        dom.interaction.classList.remove('hidden');
+        dom.intTitle.innerText = state.interaction.title;
+        dom.intDesc.innerHTML = state.interaction.desc;
+        dom.intButtons.innerHTML = '';
+
+        if (canAct) {
+            state.interaction.buttons.forEach((button) => {
+                const btn = document.createElement('button');
+                btn.innerText = button.label;
+                btn.className = button.primary ? 'primary-btn' : 'secondary-btn';
+                btn.onclick = () => socket.emit('submitAction', { actionId: button.actionId, payload: button.actionPayload });
+                dom.intButtons.appendChild(btn);
+            });
+        } else {
+            const waitingText = document.createElement('p');
+            waitingText.className = 'waiting-copy';
+            waitingText.textContent = `Waiting for ${state.players.find((player) => player.id === state.interaction.targetPlayerId)?.name || activePlayer?.name || 'another player'}...`;
+            dom.intButtons.appendChild(waitingText);
+        }
+        return;
+    }
+
+    dom.interaction.classList.add('hidden');
+}
+
+function renderActionButtons() {
+    const me = getMe();
+    const activePlayer = state.players[state.turnIndex];
+    const isMyTurn = me && activePlayer && me.id === activePlayer.id;
+    const canRoll = isMyTurn && !state.interaction && !state.isGameOver && state.turnPhase === 'roll';
+
+    dom.btnRoll.classList.toggle('hidden', !canRoll);
+    dom.btnEnd.classList.add('hidden');
+}
+
+socket.on('connect', () => {});
+
+dom.btnShowRules.addEventListener('click', () => dom.rulesModal.classList.remove('hidden'));
+dom.btnCloseRules.addEventListener('click', () => dom.rulesModal.classList.add('hidden'));
+
+dom.btnJoin.addEventListener('click', () => {
+    const name = document.getElementById('player-name').value.trim();
+    const color = document.getElementById('player-color').value;
+    const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+
+    socket.emit('joinRoom', { name, color, roomCode: code });
+    dom.lobbyScreen.classList.add('hidden');
+    dom.waitingRoom.classList.remove('hidden');
+});
+
+dom.btnAddBot.addEventListener('click', () => socket.emit('addBot'));
+dom.btnStart.addEventListener('click', () => socket.emit('startGame'));
+
+dom.btnRoll.addEventListener('click', () => {
+    dom.die1.classList.add('rolling');
+    dom.die2.classList.add('rolling');
+
+    setTimeout(() => {
+        dom.die1.classList.remove('rolling');
+        dom.die2.classList.remove('rolling');
+        socket.emit('rollDice');
+    }, 500);
+});
+
 socket.on('gameStateUpdate', (newState) => {
-    // Merge new state while preserving local UI toggles
     if (state && state.players) {
-        newState.players.forEach(np => {
-            let oldP = state.players.find(op => op.id === np.id);
-            if (oldP) np.showNiyyahUI = oldP.showNiyyahUI;
+        newState.players.forEach((incomingPlayer) => {
+            const oldPlayer = state.players.find((entry) => entry.id === incomingPlayer.id);
+            if (oldPlayer) incomingPlayer.showNiyyahUI = oldPlayer.showNiyyahUI;
         });
     }
+
     state = newState;
 
     if (state.status === 'lobby') {
         dom.dispRoomCode.innerText = state.code;
-        dom.lobbyPlayersList.innerHTML = state.players.map(p => `<li>${p.name} <span style="display:inline-block;width:10px;height:10px;background:${p.color};border-radius:50%"></span> ${p.socketId === socket.id ? '(You)' : ''}</li>`).join('');
-        
-        // Show start button only if host and >=2 players total (or bots)
-        if (state.host === socket.id && state.players.length >= 2) {
-            dom.btnStart.style.display = 'block';
-        } else {
-            dom.btnStart.style.display = 'none';
-        }
+        dom.lobbyPlayersList.innerHTML = state.players.map((player) => `
+            <li>
+                <span class="waiting-dot" style="background:${player.color}"></span>
+                ${player.name} ${player.socketId === socket.id ? '(You)' : ''} ${player.isBot ? '[Bot]' : ''}
+            </li>
+        `).join('');
 
-    } else if (state.status === 'playing' || state.status === 'gameOver') {
-        dom.lobbyScreen.classList.add('hidden');
-        dom.waitingRoom.classList.add('hidden');
-        dom.gameScreen.classList.remove('hidden');
-
-        dom.commonWell.innerText = state.commonWell;
-        dom.seedsCount.innerText = state.barakahBowl;
-
-        renderDashboard();
-
-        // Print new messages
-        state.messages.forEach(m => {
-            if (!printedMessageIds.has(m.id)) {
-                logMsgToDOM(m.msg, m.colorStr);
-                printedMessageIds.add(m.id);
-            }
-        });
-
-        let activePlayer = state.players[state.turnIndex];
-        let isMyTurn = activePlayer && (activePlayer.socketId === socket.id);
-
-        if (state.interaction) {
-            dom.btnRoll.classList.add('hidden');
-            dom.btnEnd.classList.add('hidden');
-            dom.interaction.classList.remove('hidden');
-            dom.intTitle.innerText = state.interaction.title;
-            dom.intDesc.innerHTML = state.interaction.desc;
-            dom.intButtons.innerHTML = '';
-            
-            // Only show interaction buttons to the active player whose turn it is
-            if (isMyTurn) {
-                state.interaction.buttons.forEach(b => {
-                    let btn = document.createElement('button');
-                    btn.innerText = b.label;
-                    btn.className = b.primary ? 'primary-btn' : 'secondary-btn';
-                    btn.onclick = () => { socket.emit('submitAction', { actionId: b.actionId, payload: b.actionPayload }); };
-                    dom.intButtons.appendChild(btn);
-                });
-            } else {
-                dom.intButtons.innerHTML = `<p style="font-size:0.8rem; color:var(--text-muted)">Waiting for ${activePlayer.name}...</p>`;
-            }
-        } else {
-            dom.interaction.classList.add('hidden');
-            
-            if (isMyTurn && !state.isGameOver) {
-                if (state.doublesCount > 0 && !activePlayer.inReflection) {
-                    dom.btnRoll.classList.remove('hidden');
-                    dom.btnEnd.classList.add('hidden');
-                } else {
-                    // Turn started, needs to roll
-                    // Note: backend expects rollDice if doublesCount == 0
-                    // Actually, if it's start of turn, they should roll. If they just rolled (doublesCount updated), logic might be tricky.
-                    // For simplicity, if btnRoll hasn't been blocked, let them roll.
-                    // Wait, in local, End Turn appears instead of Roll if they already moved.
-                    // If no interaction, and not doubles, they need to end turn?
-                    // Let's refine based on "canRoll" state. We lack that from server.
-                    // In gameLogic, resolving a space either causes an interaction, or falls back to endTurn(). Wait! 
-                    // My gameLogic currently calls `endTurn(io, room)` automatically if there's no interaction! 
-                    // So if there's no interaction, it's ALREADY the next player's roll phase!
-                    dom.btnRoll.classList.remove('hidden');
-                    dom.btnEnd.classList.add('hidden'); // We don't even need 'End Turn' button anymore since server auto-ends when nothing to do!
-                }
-            } else {
-                dom.btnRoll.classList.add('hidden');
-                dom.btnEnd.classList.add('hidden');
-            }
-        }
+        const isHost = state.host === socket.id;
+        dom.btnStart.classList.toggle('hidden', !(isHost && state.players.length >= 2));
+        return;
     }
+
+    dom.lobbyScreen.classList.add('hidden');
+    dom.waitingRoom.classList.add('hidden');
+    dom.gameScreen.classList.remove('hidden');
+
+    dom.commonWell.innerText = state.commonWell;
+    dom.seedsCount.innerText = state.barakahBowl;
+
+    renderDashboard();
+    renderTurnState();
+    renderInteraction();
+    renderActionButtons();
+    renderScoreboard();
+
+    state.messages.forEach((message) => {
+        if (!printedMessageIds.has(message.id)) {
+            logMsgToDOM(message.msg, message.colorStr);
+            printedMessageIds.add(message.id);
+        }
+    });
 });
