@@ -286,19 +286,15 @@ function offerAuctionTurn(room) {
     return false;
 }
 
-function queueBotAuctionDecision(io, room) {
+function resolveBotAuctionDecision(io, room) {
     if (!room.interaction || room.interaction.kind !== 'auction') return false;
     const bidder = room.players.find((player) => player.id === room.interaction.targetPlayerId);
     if (!bidder || !bidder.isBot) return false;
 
-    setTimeout(() => {
-        if (!room.interaction || room.interaction.kind !== 'auction' || room.interaction.targetPlayerId !== bidder.id) return;
-        const button = room.interaction.buttons.find((entry) => entry.primary) || room.interaction.buttons[0];
-        if (button) {
-            handleAction(io, room, bidder, button.actionId, button.actionPayload);
-        }
-    }, 700);
+    const button = room.interaction.buttons.find((entry) => entry.primary) || room.interaction.buttons[0];
+    if (!button) return false;
 
+    handleAction(io, room, bidder, button.actionId, button.actionPayload);
     return true;
 }
 
@@ -309,8 +305,11 @@ function advanceAuctionOrContinue(io, room, fallbackPlayer) {
         return;
     }
 
+    if (resolveBotAuctionDecision(io, room)) {
+        return;
+    }
+
     broadcast(io, room.code);
-    queueBotAuctionDecision(io, room);
 }
 
 function broadcast(io, roomCode) {
