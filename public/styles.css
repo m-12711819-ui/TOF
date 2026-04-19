@@ -503,6 +503,7 @@ select {
   z-index: 5;
   display: grid;
   gap: 12px;
+  margin-top: -8px;
 }
 
 .section-block {
