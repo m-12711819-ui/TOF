@@ -31,9 +31,11 @@ body {
     linear-gradient(180deg, #111923 0%, #0a0e13 100%);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 18px 0;
 }
 
 .scene-glow {
@@ -218,7 +220,7 @@ select {
   grid-template-columns: minmax(0, 1.9fr) minmax(320px, 380px);
   gap: 18px;
   width: min(1700px, 96vw);
-  height: min(95vh, 1160px);
+  min-height: min(95vh, 1160px);
   position: relative;
   z-index: 1;
 }
@@ -496,7 +498,7 @@ select {
 .players-dashboard {
   display: grid;
   gap: 12px;
-  overflow: auto;
+  overflow: visible;
   padding-right: 4px;
 }
 
@@ -676,8 +678,7 @@ select {
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow: auto;
-  max-height: 100%;
+  overflow: visible;
   display: grid;
   gap: 8px;
   color: #d8d3c7;
@@ -717,7 +718,6 @@ select {
 
 @media (max-width: 1200px) {
   body {
-    overflow: auto;
     align-items: start;
     padding: 16px 0;
   }
