@@ -110,18 +110,26 @@
     </div>
 
     <div class="sidebar">
-      <button id="btn-show-rules" class="secondary-btn wide-btn">How To Play</button>
-      <div id="players-dashboard" class="players-dashboard"></div>
-      <div id="interaction-panel" class="interaction-panel glass-panel hidden">
-        <h3 id="interaction-title">Action Title</h3>
-        <p id="interaction-desc" class="desc">Details go here.</p>
-        <div id="interaction-buttons" class="button-row"></div>
+      <div class="sidebar-top">
+        <button id="btn-show-rules" class="secondary-btn wide-btn">How To Play</button>
+        <div id="interaction-panel" class="interaction-panel glass-panel hidden">
+          <div class="section-kicker">Current Decision</div>
+          <h3 id="interaction-title">Action Title</h3>
+          <p id="interaction-desc" class="desc">Details go here.</p>
+          <div id="interaction-buttons" class="button-row"></div>
+        </div>
+      </div>
+      <div class="section-block">
+        <div class="section-kicker">Players</div>
+        <div id="players-dashboard" class="players-dashboard"></div>
       </div>
       <div id="scoreboard-panel" class="glass-panel scoreboard-panel">
+        <div class="section-kicker">Score</div>
         <h3>Legacy Standings</h3>
         <div id="scoreboard-list"></div>
       </div>
       <div class="log-panel glass-panel">
+        <div class="section-kicker">Recent Events</div>
         <h3>Chronicles</h3>
         <ul id="game-log"></ul>
       </div>
