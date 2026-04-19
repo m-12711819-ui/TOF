@@ -7,7 +7,6 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Serve frontend files
 app.use(express.static('public'));
 
 const PORT = process.env.PORT || 3000;
