@@ -19,6 +19,8 @@
 html, body {
   margin: 0;
   min-height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 
 body {
@@ -29,13 +31,8 @@ body {
     radial-gradient(circle at 80% 15%, rgba(215, 180, 90, 0.16), transparent 20%),
     radial-gradient(circle at 50% 85%, rgba(64, 91, 115, 0.35), transparent 35%),
     linear-gradient(180deg, #111923 0%, #0a0e13 100%);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   min-height: 100vh;
-  overflow-x: auto;
-  overflow-y: auto;
-  padding: 18px 0;
+  padding: 18px;
 }
 
 .scene-glow {
@@ -146,6 +143,7 @@ select {
   padding: 32px;
   position: relative;
   z-index: 1;
+  margin: 40px auto;
 }
 
 .lobby-card h1,
@@ -223,6 +221,7 @@ select {
   min-height: min(95vh, 1160px);
   position: relative;
   z-index: 1;
+  margin: 0 auto;
 }
 
 .board-wrapper {
@@ -718,8 +717,7 @@ select {
 
 @media (max-width: 1200px) {
   body {
-    align-items: start;
-    padding: 16px 0;
+    padding: 16px;
   }
 
   .game-container {
