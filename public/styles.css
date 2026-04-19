@@ -489,15 +489,39 @@ select {
 
 .sidebar {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto minmax(220px, 1fr);
+  grid-template-rows: auto auto auto 1fr;
   gap: 14px;
   min-height: 0;
+  align-content: start;
+}
+
+.sidebar-top {
+  position: sticky;
+  top: 18px;
+  z-index: 5;
+  display: grid;
+  gap: 12px;
+}
+
+.section-block {
+  display: grid;
+  gap: 8px;
+}
+
+.section-kicker {
+  color: var(--emerald);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 .players-dashboard {
   display: grid;
   gap: 12px;
-  overflow: visible;
+  max-height: 36vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 4px;
 }
 
@@ -615,11 +639,16 @@ select {
   padding: 18px;
 }
 
+.interaction-panel {
+  border-color: rgba(215, 180, 90, 0.16);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
+}
+
 .interaction-panel h3,
 .scoreboard-panel h3,
 .log-panel h3 {
   color: var(--emerald);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .desc {
@@ -677,7 +706,9 @@ select {
   list-style: none;
   padding: 0;
   margin: 0;
-  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 28vh;
   display: grid;
   gap: 8px;
   color: #d8d3c7;
@@ -732,6 +763,16 @@ select {
 
   .sidebar {
     grid-template-rows: auto;
+  }
+
+  .sidebar-top {
+    position: static;
+  }
+
+  .players-dashboard,
+  #game-log {
+    max-height: none;
+    overflow: visible;
   }
 
   .branding h1 {
