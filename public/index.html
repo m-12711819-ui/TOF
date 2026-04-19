@@ -8,130 +8,126 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="rules-modal" class="glass-panel hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-height: 80vh; z-index: 2000; overflow-y: auto; text-align: left; padding: 30px; border: 2px solid var(--gold);">
-    <h2 style="color:var(--gold); border-bottom: 1px solid var(--gold); padding-bottom:10px;">Tides of Fate: The Guide</h2>
-    
-    <div style="margin-top: 20px; line-height: 1.6;">
-        <h3 style="color:var(--emerald);">Objective</h3>
-        <p>Your goal is to build the greatest **Legacy Score** by acquiring wealth, developing properties, fulfilling secret Niyyah (Intentions), and earning Gratitude Tokens by helping others. The game ends the moment the **Barakah Bowl hits 20 Golden Seeds**!</p>
-        
-        <h3 style="color:var(--emerald); margin-top:20px;">Key Mechanics</h3>
-        <ul style="margin-left:20px; margin-bottom: 20px;">
-            <li><strong style="color:var(--gold)">The Barakah Bowl:</strong> Seeds are added when players roll 3 doubles, waive rent for another player, or trigger specific Tides of Fate events. At 20 Seeds, the Era of Prosperity arrives and the game instantly ends!</li>
-            <li><strong style="color:var(--gold)">The Common Well (Charity):</strong> Landing on Zakat/Sadaqah forces you to pay into the Well. If you land on The Oasis and the Well has 100+ Dirhams, the poorest player receives 100 Dirhams!</li>
-            <li><strong style="color:var(--gold)">Waiving Rent:</strong> If you owe rent on an opponent's property, they can choose to **Waive** the fee. This grants them a Gratitude Token (worth massive points at the end) and adds a Golden Seed to the bowl!</li>
-            <li><strong style="color:var(--gold)">Reflection Garden:</strong> If you roll 3 doubles or land on 'Go To Reflection', you are sent here. You must wait 3 turns OR roll doubles to leave early.</li>
-            <li><strong style="color:var(--gold)">Secret Niyyah Cards:</strong> Every player starts with 3 hidden objective cards. Fulfill their confusing or peculiar tasks quietly throughout the game for massive bonus points when the game ends. Keep them secret!</li>
-            <li><strong style="color:var(--gold)">Tides of Fate:</strong> Landing on these spaces triggers server-wide global events. Some help everyone, some trigger recessions, and some dump seeds into the Barakah Bowl.</li>
-        </ul>
+  <div class="scene-glow scene-glow-a"></div>
+  <div class="scene-glow scene-glow-b"></div>
+
+  <div id="rules-modal" class="glass-panel modal hidden">
+    <h2>Tides of Fate: The Guide</h2>
+    <div class="modal-copy">
+      <h3>Objective</h3>
+      <p>Your goal is to build the greatest Legacy Score by acquiring wealth, developing properties, fulfilling secret Niyyah, and earning Gratitude Tokens by helping others. The game ends the moment the Barakah Bowl hits 20 Golden Seeds.</p>
+
+      <h3>Key Mechanics</h3>
+      <ul>
+        <li>The Barakah Bowl fills when players roll 3 doubles, waive rent, or trigger specific Tides of Fate events.</li>
+        <li>The Common Well collects charity and can reward the poorest player when someone lands on The Oasis.</li>
+        <li>Reflection Garden works like jail: wait 3 turns or roll doubles to leave early.</li>
+        <li>Waiving rent grants the owner a Gratitude Token and adds a Golden Seed.</li>
+        <li>Every player begins with 3 secret Niyyah cards for bonus endgame Legacy.</li>
+      </ul>
     </div>
-    
-    <button id="btn-close-rules" class="primary-btn" style="margin-top:20px; width:100%;">Close</button>
+    <button id="btn-close-rules" class="primary-btn wide-btn">Close</button>
   </div>
 
-  <!-- LOBBY SCREEN -->
-  <div id="lobby-screen" class="glass-panel" style="width: 400px; text-align: center; padding: 30px;">
-    <h1 style="color:var(--gold)">Tides of Fate</h1>
-    <div style="margin: 20px 0;">
-        <input type="text" id="player-name" placeholder="Enter Your Name" style="padding: 10px; width: 100%; border-radius: 4px; border: none; margin-bottom: 10px;">
-        
-        <select id="player-color" style="padding: 10px; width: 100%; border-radius: 4px; border: none; margin-bottom: 20px; color: black;">
-            <option value="#f44336">Red</option>
-            <option value="#2196f3">Blue</option>
-            <option value="#4caf50">Green</option>
-            <option value="#ff9800">Orange</option>
-        </select>
-        
-        <input type="text" id="room-code-input" placeholder="Room Code (Leave empty to create new)" style="padding: 10px; width: 100%; border-radius: 4px; border: none; margin-bottom: 20px; text-transform: uppercase;">
-
-        <button id="btn-join-room" class="primary-btn" style="width: 100%; margin-bottom: 10px;">Create / Join Lobby</button>
+  <div id="lobby-screen" class="glass-panel lobby-card">
+    <div class="eyebrow">Multiplayer Board Strategy</div>
+    <h1>Tides of Fate</h1>
+    <p class="intro-copy">A Monopoly-style game with charity, gratitude, and a shared prosperity ending.</p>
+    <div class="lobby-form">
+      <input type="text" id="player-name" placeholder="Enter your name">
+      <select id="player-color">
+        <option value="#f44336">Red</option>
+        <option value="#2196f3">Blue</option>
+        <option value="#4caf50">Green</option>
+        <option value="#ff9800">Amber</option>
+      </select>
+      <input type="text" id="room-code-input" placeholder="Room code (leave empty to create)" maxlength="8">
+      <button id="btn-join-room" class="primary-btn wide-btn">Create / Join Lobby</button>
     </div>
   </div>
 
-  <!-- WAITING ROOM (Inside Lobby after joining) -->
-  <div id="waiting-room" class="glass-panel hidden" style="width: 400px; text-align: center; padding: 30px;">
-    <h2 style="color:var(--emerald)">Room: <span id="display-room-code"></span></h2>
-    <h3 style="margin-top:20px; text-align:center;">Players</h3>
-    <ul id="lobby-players-list" style="list-style: none; padding:0; margin-bottom:20px; text-align:center;">
-        <!-- Injected -->
-    </ul>
-    
-    <button id="btn-add-bot" class="secondary-btn" style="width:100%; margin-bottom: 10px;">Add Bot 🤖</button>
-    <button id="btn-start-game" class="primary-btn" style="width:100%; display:none;">Start Game</button>
+  <div id="waiting-room" class="glass-panel lobby-card hidden">
+    <div class="eyebrow">Lobby</div>
+    <h2>Room <span id="display-room-code"></span></h2>
+    <h3>Players</h3>
+    <ul id="lobby-players-list" class="waiting-players"></ul>
+    <button id="btn-add-bot" class="secondary-btn wide-btn">Add Bot</button>
+    <button id="btn-start-game" class="primary-btn wide-btn hidden">Start Game</button>
   </div>
 
   <div id="game-screen" class="game-container hidden">
-    <!-- Left: The Board -->
     <div class="board-wrapper">
-        <div id="board" class="board">
-            <!-- The 40 board spaces will be injected here via JS -->
+      <div id="board" class="board">
+        <div class="center-hub">
+          <div class="branding">
+            <div class="eyebrow">Shared Fortune Board</div>
+            <h1>Tides of Fate</h1>
+          </div>
 
-            <!-- Center of the Board: The Hub -->
-            <div class="center-hub">
-                <div class="branding">
-                    <h1>Tides of Fate</h1>
-                </div>
-
-                <div class="well-bowl-container">
-                    <div class="well glass-panel">
-                        <h3>The Common Well</h3>
-                        <div class="amount"><span id="common-well-amount">0</span> D</div>
-                    </div>
-
-                    <div class="bowl glass-panel">
-                        <h3>Barakah Bowl</h3>
-                        <div class="amount"><span id="seeds-count">0</span> / 20</div>
-                        <div class="subtitle">Golden Seeds</div>
-                    </div>
-                </div>
-
-                <div class="action-center glass-panel">
-                    <div class="dice-container">
-                        <div id="die1" class="die">🎲</div>
-                        <div id="die2" class="die">🎲</div>
-                    </div>
-                    <button id="btn-roll" class="primary-btn">Roll Dice</button>
-                    <button id="btn-end-turn" class="secondary-btn hidden">End Turn</button>
-                </div>
-                
-                <div id="card-display" class="card-display hidden glass-panel">
-                    <h3 id="card-title">Card Title</h3>
-                    <p id="card-desc">Card Description</p>
-                    <button id="btn-dismiss-card" class="primary-btn">Acknowledge</button>
-                </div>
+          <div class="status-strip glass-panel">
+            <div class="status-item">
+              <span class="status-label">Turn</span>
+              <span id="turn-indicator" class="status-value">Waiting...</span>
             </div>
+            <div class="status-item">
+              <span class="status-label">Phase</span>
+              <span id="phase-indicator" class="status-value">Lobby</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Last Roll</span>
+              <span id="last-roll-indicator" class="status-value">-</span>
+            </div>
+          </div>
+
+          <div class="well-bowl-container">
+            <div class="well glass-panel">
+              <h3>The Common Well</h3>
+              <div class="amount"><span id="common-well-amount">0</span> D</div>
+            </div>
+            <div class="bowl glass-panel">
+              <h3>Barakah Bowl</h3>
+              <div class="amount"><span id="seeds-count">0</span> / 20</div>
+              <div class="subtitle">Golden Seeds</div>
+            </div>
+          </div>
+
+          <div class="action-center glass-panel">
+            <div class="dice-container">
+              <div id="die1" class="die">?</div>
+              <div id="die2" class="die">?</div>
+            </div>
+            <button id="btn-roll" class="primary-btn">Roll Dice</button>
+            <button id="btn-end-turn" class="secondary-btn hidden">End Turn</button>
+          </div>
+
+          <div id="card-display" class="card-display hidden glass-panel">
+            <h3 id="card-title">Card Title</h3>
+            <p id="card-desc">Card Description</p>
+            <button id="btn-dismiss-card" class="primary-btn">Acknowledge</button>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- Right: Sidebar & Dashboards -->
     <div class="sidebar">
-          <!-- Right: Sidebar & Dashboards -->
-        <button id="btn-show-rules" class="secondary-btn" style="width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: -5px;">How To Play</button>
-
-        <!-- Player stats map -->
-        <div id="players-dashboard" class="players-dashboard">
-            <!-- Injected by JS -->
-        </div>
-
-        <!-- Action Panel for Interactions (Buying, Co-Investing, Waiving) -->
-        <div id="interaction-panel" class="interaction-panel glass-panel hidden">
-            <h3 id="interaction-title">Action Title</h3>
-            <p id="interaction-desc" class="desc">Details goes here.</p>
-            <div id="interaction-buttons" class="button-row">
-                <!-- dynamic buttons -->
-            </div>
-        </div>
-
-        <!-- Game Log -->
-        <div class="log-panel glass-panel">
-            <h3>Chronicles</h3>
-            <ul id="game-log">
-            </ul>
-        </div>
+      <button id="btn-show-rules" class="secondary-btn wide-btn">How To Play</button>
+      <div id="players-dashboard" class="players-dashboard"></div>
+      <div id="interaction-panel" class="interaction-panel glass-panel hidden">
+        <h3 id="interaction-title">Action Title</h3>
+        <p id="interaction-desc" class="desc">Details go here.</p>
+        <div id="interaction-buttons" class="button-row"></div>
+      </div>
+      <div id="scoreboard-panel" class="glass-panel scoreboard-panel">
+        <h3>Legacy Standings</h3>
+        <div id="scoreboard-list"></div>
+      </div>
+      <div class="log-panel glass-panel">
+        <h3>Chronicles</h3>
+        <ul id="game-log"></ul>
+      </div>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="data.js"></script>
   <script src="engine.js"></script>
